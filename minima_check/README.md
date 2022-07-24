@@ -11,7 +11,7 @@ Fill `minima_check.csv` with your datas and `minima_check.ini` with your Telegra
 
 Files must end with a single blank line.
 
-Make execute and execute:
+Make executable and execute:
 ```
 chmod +x minima_check.*
 bash minima_check.sh

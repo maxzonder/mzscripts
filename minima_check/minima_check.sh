@@ -42,7 +42,7 @@ do
       output+="FAIL!,\xE2\x9C\x96"$'\n'
     fi
   fi   
-done < $SCRIPT_DIR/minima_servers.csv
+done < $SCRIPT_DIR/minima_check.csv
 
 output=$(echo "${output}" | column -s "," -t | sed 's/^...assign_id/<\/pre><i>...trying to assign right ID<\/i><pre>/g')
 

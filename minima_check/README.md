@@ -1,4 +1,4 @@
-Download
+Download script
 ```
 mkdir -p $HOME/minima_check && cd $HOME/minima_check
 
@@ -10,8 +10,13 @@ Fill `minima_check.csv` with your datas and `minima_check.ini` with your Telegra
 
 The last line of the files should be empty line!
 
-Make execute and execute
+Make execute and execute:
 ```
 chmod +x minima_check.*
 bash minima_check.sh
+```
+
+Add to cron e.g. every hour (change `root` to username if needed)
+```
+0 */1 * * *  /bin/bash /root/scripts/minima_check.sh
 ```

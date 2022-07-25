@@ -16,11 +16,16 @@ output+="=======,======,======, "$'\n'
 while IFS="," read -r ACCOUNT_NAME SERVER_NAME SERVER_IP ACCOUNT_ID
 do
   # check id
-  current_id=$(curl -s --max-time $CURL_TIMEOUT ${SERVER_IP}:9002/incentivecash | jq -r .response.uid)
+  current_query=$(curl -s --max-time $CURL_TIMEOUT ${SERVER_IP}:9002/incentivecash)
+  current_id=$(echo "${current_query}" | jq -r .response.uid)
   output+="${ACCOUNT_NAME},${SERVER_NAME}," 
   if [ "${current_id}" = "${ACCOUNT_ID}" ]; then
-    rewards=$(curl -s --max-time $CURL_TIMEOUT ${SERVER_IP}:9002/incentivecash | jq -r .response.details.rewards.dailyRewards)
-    output+="${rewards},OK"$'\n'
+    rewards=$(echo "${current_query}" | jq -r .response.details.rewards.dailyRewards)
+    if [ -n "${rewards}" ]; then
+      output+="${rewards},OK"$'\n'
+    else 
+      output+="???,OK?"$'\n'  
+    fi
   else  
     if [ -z "${current_id}" ]; then
       output+="NO_ID,\xE2\x9D\x97"$'\n'
@@ -34,8 +39,9 @@ do
     do_correct=$(curl -s --max-time $CURL_TIMEOUT ${SERVER_IP}:9002/incentivecash%20uid:${ACCOUNT_ID})
     sleep 1
     # check id again
-    current_id=$(curl -s --max-time $CURL_TIMEOUT ${SERVER_IP}:9002/incentivecash | jq -r .response.uid)
-    rewards=$(curl -s --max-time $CURL_TIMEOUT ${SERVER_IP}:9002/incentivecash | jq -r .response.details.rewards.dailyRewards)
+    current_query=$(curl -s --max-time $CURL_TIMEOUT ${SERVER_IP}:9002/incentivecash)
+    current_id=$(echo "${current_query}" | jq -r .response.uid)
+    rewards=$(echo "${current_query}" | jq -r .response.details.rewards.dailyRewards)
     if [ "${current_id}" = "${ACCOUNT_ID}" ]; then
       output+="${rewards},\xE2\x9C\x94"$'\n'
     else 

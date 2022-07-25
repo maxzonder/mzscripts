@@ -57,7 +57,7 @@ account_name5,server_name5,server_ip5,your_id5
 
 _File must end with a single blank line._
 
-# How yo update script
+# How to update script
 
 ```
 cd $HOME/minima_check

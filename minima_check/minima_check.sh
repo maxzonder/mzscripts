@@ -17,8 +17,13 @@ output_status="ACCOUNT,VERSION,BLOCK"$'\n'
 output_status+="=======,=======,===== "$'\n'
 while IFS="," read -r ACCOUNT_NAME SERVER_NAME SERVER_IP ACCOUNT_ID
 do
+  # parse ip
+  ip=$(echo "${SERVER_IP}" | awk -F ":" '{print $1}')
+  port=$(echo "${SERVER_IP}" | awk -F ":" '{print $2}')
+  if [ -z "${port}" ]; then port=9002; fi
+  SERVER_IP="${ip}:${port}"
   # check id
-  current_query=$(curl -s --max-time $CURL_TIMEOUT ${SERVER_IP}:9002/incentivecash)
+  current_query=$(curl -s --max-time $CURL_TIMEOUT ${SERVER_IP}/incentivecash)
   current_id=$(echo "${current_query}" | jq -r .response.uid)
   output+="${ACCOUNT_NAME},${SERVER_NAME},"
   if [ "${current_id}" = "${ACCOUNT_ID}" ]; then
@@ -38,10 +43,10 @@ do
     fi
     # try to correct id    
     output+="${ACCOUNT_NAME},${SERVER_NAME},"
-    do_correct=$(curl -s --max-time $CURL_TIMEOUT ${SERVER_IP}:9002/incentivecash%20uid:${ACCOUNT_ID})
+    do_correct=$(curl -s --max-time $CURL_TIMEOUT ${SERVER_IP}/incentivecash%20uid:${ACCOUNT_ID})
     sleep 1
     # check id again
-    current_query=$(curl -s --max-time $CURL_TIMEOUT ${SERVER_IP}:9002/incentivecash)
+    current_query=$(curl -s --max-time $CURL_TIMEOUT ${SERVER_IP}/incentivecash)
     current_id=$(echo "${current_query}" | jq -r .response.uid)
     rewards=$(echo "${current_query}" | jq -r .response.details.rewards.dailyRewards)
     if [ "${current_id}" = "${ACCOUNT_ID}" ]; then
@@ -51,7 +56,7 @@ do
     fi
   fi  
   # check version and block
-  status_query=$(curl -s --max-time $CURL_TIMEOUT ${SERVER_IP}:9002/status)
+  status_query=$(curl -s --max-time $CURL_TIMEOUT ${SERVER_IP}/status)
   current_version=$(echo "${status_query}" | jq -r .response.version)
   current_block=$(echo "${status_query}" | jq -r .response.chain.block)
   if [ -z "${current_version}" ]; then current_version="ERROR!"; fi

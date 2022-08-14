@@ -35,7 +35,7 @@ CURL_TIMEOUT=3
 
 `TG_TOKEN` - your telegram HTTP API,
 
-`CURL_TIMEOUT` - timeout to curl server (default is 3 seconds).
+`CURL_TIMEOUT` - timeout to curl server (default is 15 seconds).
 
 _File must end with a single blank line._
 
@@ -67,6 +67,6 @@ chmod +x minima_check.sh
 ```
 
 ## Preview
-![image](https://user-images.githubusercontent.com/73627790/180659898-70716ed2-6a89-48da-85e6-e1c9e1c93964.png)
+![image](https://user-images.githubusercontent.com/73627790/184517723-74e618df-3bcd-4e68-a929-50cc82d353d4.png)
 
 

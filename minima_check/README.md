@@ -43,7 +43,7 @@ _File must end with a single blank line._
 
 ```
 account_name1,server_name1,server_ip1,your_id1
-account_name2,server_name2,server_ip2,your_id2
+account_name2,server_name2,server_ip2:port2,your_id2
 ...
 account_name5,server_name5,server_ip5,your_id5
 
@@ -51,7 +51,9 @@ account_name5,server_name5,server_ip5,your_id5
 
 `account_name`, `server_name`- any names you want,
 
-`server_ip` - server IP `111.222.333.444` without port (9002 is hardcoded),
+`server_ip`- server IP e.g. `111.222.333.444`,
+
+`port` (optional) - server IP port , if not specified, then = `9002`,
 
 `your_id` - your minima node id, e.g. `12345522-d4b4-32d6-8abc-e345a046528a1`.
 

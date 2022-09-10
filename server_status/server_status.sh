@@ -65,6 +65,13 @@ if [[ -n "${DRIVES}" ]]; then
     result=$(awk -F '[[:space:]][[:space:]]+' '$1 == "Percentage Used:" {print $2}' $SCRIPT_DIR/server_status_smart_query_drive${i}.txt | sed 's/.$//') 
     set_status $SMART_TRESHOLD_RED $SMART_TRESHOLD_YELLOW;
     output_smart+="   Percentage Used: ${result}% - $status"$'\n'
+    errors=$(awk -F '[[:space:]][[:space:]]+' '$1 == "Error Information Log Entries:" {print $2}' $SCRIPT_DIR/server_status_smart_query_drive${i}.txt) 
+    status="OK"
+    if [ "${errors}" -gt 0 ]; then
+      # set red mark (cross mark emoji)
+      status="\xE2\x9D\x8C"
+    fi
+    output_smart+="   Error Entries:   ${errors} - $status"$'\n'    
     data_written=$(grep "Data Units Written:" $SCRIPT_DIR/server_status_smart_query_drive${i}.txt) 
     amount=$(echo "${data_written#*[}" | sed 's/.$//')
     output_smart+="   Data Written: ${amount}"$'\n\n'

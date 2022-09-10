@@ -1,5 +1,4 @@
 #!/bin/bash
-#!/bin/bash
 
 # Load config
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
@@ -36,13 +35,16 @@ fill_mount_line() {
 
 # Disk Storage 
 IFS=" " read -a mountsArray <<< $MOUNTS
+IFS=" " read -a mountsNamesArray <<< $MOUNTS_NAMES
 df -h --total > $SCRIPT_DIR/server_status_df_query.txt
 
  output_line='MOUNT,SIZE,FREE,USED,STATUS'$'\n' 
 output_line+='-----,----,----,----,------'$'\n' 
+name_index=0;
 for mount in ${mountsArray[@]}; do
-  output_line+="${mount},"
+  output_line+="${mountsNamesArray[$i]},"
   fill_mount_line ${mount}
+  ((i=i+1))
 done
 output_line+='-----,----,----,----,------'$'\n' 
 output_line+="Total,"

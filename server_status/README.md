@@ -162,4 +162,4 @@ chmod +x server_status.sh
 ```
 
 # Preview
-![image](https://user-images.githubusercontent.com/73627790/189488542-cf126f92-3a2e-4524-80be-ee16a21d88ea.png)
+![image](https://user-images.githubusercontent.com/73627790/189493552-fe5fea49-16b9-4342-b2a2-ca2550692aa1.png)

@@ -7,7 +7,7 @@ wget -O minima_check.sh https://raw.githubusercontent.com/maxzonder/mzscripts/ma
 wget https://raw.githubusercontent.com/maxzonder/mzscripts/main/minima_check/minima_check.ini
 wget https://raw.githubusercontent.com/maxzonder/mzscripts/main/minima_check/minima_check.csv
 ```
-Fill `minima_check.csv` with your datas and `minima_check.ini` with your Telegram HTTP API and account ID (call `@bot_father` and `@getmyid_bot`).
+Fill `minima_check.csv` with your datas and `minima_check.ini` with your Telegram HTTP API and account ID (call [@BotFather](https://t.me/BotFather) and [@getmyid_bot](https://t.me/getmyid_bot)).
 
 Files must end with a single blank line.
 

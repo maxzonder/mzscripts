@@ -72,32 +72,6 @@ apt-get update && apt-get install smartmontools -y
 
 # Prepare `server_status.ini`:
 
-## Prepare `DRIVES`
-
-Leave `DRIVES=""` empty on VPS/VDS to **disable** SMART checking functionality.
-
-Scan drives on dedicated server and put them into the `DRIVES="..."`, separated by space.
-
-```bash
-smartctl --scan
-```
-
-Output example:
-
-```
-/dev/nvme0 -d nvme # /dev/nvme0, NVMe device
-/dev/nvme1 -d nvme # /dev/nvme1, NVMe device
-/dev/nvme2 -d nvme # /dev/nvme2, NVMe device
-```
-
-Filling `DRIVES` example with above output:
-
-```ini
-...
-DRIVES="/dev/nvme0 /dev/nvme1 /dev/nvme2"
-...
-```
-
 ## Prepare `MOUNTS` and `MOUNTS_NAMES`
 
 Output disk space and choose mount point you want to track, fill `MOUNTS` and `MOUNTS_NAMES` with values separated by space.
@@ -129,6 +103,32 @@ Filling `MOUNTS` and `MOUNTS_NAMES` example:
 ...
 MOUNTS="/dev/nvme0n1p3 /dev/nvme1n1p1 /dev/nvme2n1p1"
 MOUNTS_NAMES="/root /mydisk1 /mydisk2"
+...
+```
+
+## Prepare `DRIVES`
+
+Leave `DRIVES=""` empty on VPS/VDS to **disable** SMART checking functionality.
+
+Scan drives on dedicated server and put them into the `DRIVES="..."`, separated by space.
+
+```bash
+smartctl --scan
+```
+
+Output example:
+
+```
+/dev/nvme0 -d nvme # /dev/nvme0, NVMe device
+/dev/nvme1 -d nvme # /dev/nvme1, NVMe device
+/dev/nvme2 -d nvme # /dev/nvme2, NVMe device
+```
+
+Filling `DRIVES` example with above output:
+
+```ini
+...
+DRIVES="/dev/nvme0 /dev/nvme1 /dev/nvme2"
 ...
 ```
 

@@ -149,5 +149,17 @@ Add to cron e.g. every day "At 9:00." (change `root` to your home_dir if needed)
 0 9 * * * /bin/bash /root/scripts/minima_check.sh
 ```
 
+# How to update script
+
+```bash
+# switch to root if needed
+su -
+
+cd $HOME/scripts/server_status
+mv server_status.sh server_status.old
+wget -O server_status.sh https://raw.githubusercontent.com/maxzonder/mzscripts/main/server_status/server_status.sh
+chmod +x server_status.sh
+```
+
 # Preview
 ![image](https://user-images.githubusercontent.com/73627790/189488542-cf126f92-3a2e-4524-80be-ee16a21d88ea.png)

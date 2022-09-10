@@ -146,7 +146,7 @@ If output ok, create cron task.
 Add to cron e.g. every day "At 9:00." (change `root` to your home_dir if needed):
 
 ```
-0 9 * * * /bin/bash /root/scripts/minima_check.sh
+0 9 * * * /bin/bash /root/scripts/server_status.sh
 ```
 
 # How to update script

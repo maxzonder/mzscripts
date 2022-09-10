@@ -4,6 +4,7 @@ Script checks disk space, SMART status (on dedicated servers), RAM and CPU usage
 # Dependencies and settings
 1. Script must be installed as `root` to read disks' SMART status. No `root` needed if you disable SMART checking function. It is unable to check SMART status on VPS/VDS.
 2. `smartmontools` is needed to check SMART status.
+3. `bsdmainutils` is needed to format output with `columns` command (may absent on some ISOs).
 
 ## `server_status.ini` format
 

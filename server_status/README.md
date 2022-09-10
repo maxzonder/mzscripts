@@ -1,14 +1,62 @@
-Script checks disk space, SMART status, RAM and CPU usage and sends info to telegram.
+# Info
+Script checks disk space, SMART status (on dedicated servers), RAM and CPU usage and sends info to telegram.
 
-**to use `smartclt` script should be installed to root!**
+# Dependencies and settings
+1. Script must be installed as `root` to read disks' SMART status. No `root` needed if you disable SMART checking function. It is unable to check SMART status on VPS/VDS.
+2. `smartmontools` is needed to check SMART status.
 
-1. Install
+## `server_status.ini` format
+
+Example:
+
+```ini
+SERVER_NAME="HETZ-01"
+MOUNTS="/dev/nvme0n1p3 /dev/nvme1n1 /dev/nvme2n1"
+MOUNTS_NAMES="/root /mnt/disk1 /mnt/disk2"
+DRIVES="/dev/nvme0 /dev/nvme1 /dev/nvme2"
+STORAGE_TRESHOLD_YELLOW=70
+STORAGE_TRESHOLD_RED=85
+SMART_TRESHOLD_YELLOW=80
+SMART_TRESHOLD_RED=90
+MEMORY_TRESHOLD_YELLOW=85
+MEMORY_TRESHOLD_RED=95
+CPU_TRESHOLD_YELLOW=80
+CPU_TRESHOLD_RED=90
+TG_CHAT_ID="123123123"
+TG_TOKEN="23434343434:AAbbbcccabcabcacbabcabcabcabc"
+
 
 ```
-su -
+_File must end with a single blank line!_
 
-mkdir -p /root/scripts/server_status
-cd /root/scripts/server_status
+`SERVER_NAME` - any server name,
+
+`MOUNTS` - mount points separated by space (see instructions below),
+
+`MOUNTS_NAMES` - human readable names for every mount point, separated by space,
+
+`DRIVES` - server drives separated by space (see instructions below),
+
+`*_TRESHOLD*` - config tresholds (%) for output status. There are 3 possible statuses: OK, :warning: , :red_circle:.
+
+`TG_CHAT_ID` - your telegram account id,
+
+`TG_TOKEN` - your telegram bot HTTP API.
+
+
+# Install
+
+Login as root (you can skip this if you dont need SMART checking functionality).
+
+```bash
+su -
+```
+
+Download script
+
+```bash
+mkdir -p $HOME/scripts/server_status
+cd $HOME/scripts/server_status
 
 wget -O server_status.sh https://raw.githubusercontent.com/maxzonder/mzscripts/main/server_status/server_status.sh
 wget https://raw.githubusercontent.com/maxzonder/mzscripts/main/server_status/server_status.ini
@@ -16,51 +64,90 @@ wget https://raw.githubusercontent.com/maxzonder/mzscripts/main/server_status/se
 chmod +x server_status.*
 ```
 
-2. Prepare `server_status.ini`:
+Install `smartmontools` (you can skip this if you don't need SMART checking functionality):
 
-Install `smartmontools`:
-
-```
+```bash
 apt-get update && apt-get install smartmontools -y
 ```
 
-Scan drives and put them into DRIVES var, separated with space.
-(not for VPS)
+# Prepare `server_status.ini`:
 
-```
+## Prepare `DRIVES`
+
+Leave `DRIVES=""` empty on VPS/VDS to **disable** SMART checking functionality.
+
+Scan drives on dedicated server and put them into the `DRIVES="..."`, separated by space.
+
+```bash
 smartctl --scan
 ```
-output example:
+
+Output example:
+
 ```
 /dev/nvme0 -d nvme # /dev/nvme0, NVMe device
 /dev/nvme1 -d nvme # /dev/nvme1, NVMe device
+/dev/nvme2 -d nvme # /dev/nvme2, NVMe device
 ```
 
-Output disk space and choose mount point, fill MOUNTS with values separated with space
+Filling `DRIVES` example with above output:
 
+```ini
+...
+DRIVES="/dev/nvme0 /dev/nvme1 /dev/nvme2"
+...
 ```
+
+## Prepare `MOUNTS` and `MOUNTS_NAMES`
+
+Output disk space and choose mount point you want to track, fill `MOUNTS` and `MOUNTS_NAMES` with values separated by space.
+
+```bash
 df -h
 ```
 
-output example
+Output example:
 
 ```
 Filesystem      Size  Used Avail Use% Mounted on
 udev             32G     0   32G   0% /dev
-tmpfs           6.3G  948K  6.3G   1% /run
-/dev/md2        921G  101G  774G  12% /
-tmpfs            32G  156K   32G   1% /dev/shm
+tmpfs           6.3G 1008K  6.3G   1% /run
+/dev/nvme0n1p3  906G  199G  661G  24% /
+tmpfs            32G     0   32G   0% /dev/shm
 tmpfs           5.0M     0  5.0M   0% /run/lock
 tmpfs            32G     0   32G   0% /sys/fs/cgroup
-/dev/md1        485M  100M  360M  22% /boot
+/dev/nvme0n1p2  975M  166M  758M  18% /boot
+/dev/nvme1n1p1  938G   77M  891G   1% /mnt/disk1
+/dev/nvme2n1p1  938G   77M  891G   1% /mnt/disk2
+tmpfs           6.3G     0  6.3G   0% /run/user/9001
 tmpfs           6.3G     0  6.3G   0% /run/user/0
 ```
 
-`/dev/md2` is a right mount point. 
+Filling `MOUNTS` and `MOUNTS_NAMES` example:
 
-Run
+```ini
+...
+MOUNTS="/dev/nvme0n1p3 /dev/nvme1n1p1 /dev/nvme2n1p1"
+MOUNTS_NAMES="/root /mydisk1 /mydisk2"
+...
 ```
+
+Save changes to `server_status.ini` and run the script to check.
+
+# Run
+
+```bash
 bash server_status.sh
 ```
 
-Add to cron
+If output ok, create cron task.
+
+# Add to cron
+Add to cron e.g. every day "At 9:00." (change `root` to your home_dir if needed):
+
+```
+0 9 * * * /bin/bash /root/scripts/minima_check.sh
+```
+
+# Preview
+![image](https://user-images.githubusercontent.com/73627790/189488542-cf126f92-3a2e-4524-80be-ee16a21d88ea.png)

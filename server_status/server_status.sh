@@ -1,4 +1,5 @@
 #!/bin/bash
+export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 
 # Load config
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"

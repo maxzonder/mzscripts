@@ -80,7 +80,7 @@ if [[ -n "${DRIVES}" ]]; then
     output_smart+="   Data Written: ${amount}"$'\n\n'
   done
 else  
-  output_smart="It is a VPS"$'\n\n'
+  output_smart="Disabled"$'\n\n'
 fi
 
 # Memory usage

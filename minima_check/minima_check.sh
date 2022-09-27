@@ -6,7 +6,7 @@ SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 IFS="="
 while read -r name value
 do
-  if [ -n "${name}" ]; then
+  if [[ -n "${name}" && "${name}" != [[:blank:]#]* ]]; then
     eval ${name}="${value}"
   fi
 done < $SCRIPT_DIR/minima_check.ini

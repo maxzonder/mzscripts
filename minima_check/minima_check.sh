@@ -22,7 +22,7 @@ do
   # parse ip
   ip=$(echo "${SERVER_IP}" | awk -F ":" '{print $1}')
   port=$(echo "${SERVER_IP}" | awk -F ":" '{print $2}')
-  if [ -z "${port}" ]; then port=9002; fi
+  if [ -z "${port}" ]; then port=9005; fi
   SERVER_IP="${ip}:${port}"
   # check id
   current_query=$(curl -s --max-time $CURL_TIMEOUT ${SERVER_IP}/incentivecash)

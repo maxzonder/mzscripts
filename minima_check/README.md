@@ -17,7 +17,7 @@ chmod +x minima_check.*
 bash minima_check.sh
 ```
 
-Add to cron e.g. every hour (change `root` to username if needed):
+Add to cron e.g. every hour (change `root` to your $HOME dir if needed):
 ```
 0 */1 * * *  /bin/bash /root/scripts/minima_check.sh
 ```
@@ -27,7 +27,7 @@ Add to cron e.g. every hour (change `root` to username if needed):
 ```
 TG_CHAT_ID="123123123"
 TG_TOKEN="123123123:abcabcbacbacbacabacbacbacbacb"
-CURL_TIMEOUT=3
+CURL_TIMEOUT=15
 
 ```
 
@@ -53,7 +53,7 @@ account_name5,server_name5,server_ip5,your_id5
 
 `server_ip`- server IP e.g. `111.222.333.444`,
 
-`port` (optional) - server IP port , if not specified, then = `9002`,
+`port` (optional) - server IP port , if not specified, then = `9005`,
 
 `your_id` - your minima node id, e.g. `12345522-d4b4-32d6-8abc-e345a046528a1`.
 

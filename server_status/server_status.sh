@@ -35,6 +35,9 @@ fill_mount_line() {
 }
 
 # START
+if [[ -n "${DRIVES}" ]]; then
+  SERVER_INFO=${SERVER_INFO}$'\n\n'
+fi
 
 # Disk Storage 
 IFS=" " read -a mountsArray <<< $MOUNTS
@@ -104,7 +107,7 @@ set_status $CPU_TRESHOLD_RED $CPU_TRESHOLD_YELLOW;
 output_cpu="${cpu_usage}% - ${status}"
 
 # Send Message
-message=$(echo -e "<b>${SERVER_NAME}</b> | $(date +'%Y-%m-%d  %H:%M:%S')\n\n<b>Disk Space</b>\n\n<pre>${output_storage}</pre>\n\n<b>SMART Status</b>\n\n<pre>${output_smart}</pre><b>Memory</b>\n<pre>$output_memory</pre>\n\n<b>CPU</b>\n<pre>$output_cpu</pre>")
+message=$(echo -e "<b>${SERVER_NAME}</b> | $(date +'%Y-%m-%d  %H:%M:%S')\n\n${SERVER_INFO}<b>Disk Space</b>\n\n<pre>${output_storage}</pre>\n\n<b>SMART Status</b>\n\n<pre>${output_smart}</pre><b>Memory</b>\n<pre>$output_memory</pre>\n\n<b>CPU</b>\n<pre>$output_cpu</pre>")
 
 if [ -n "${TG_TOKEN}" ]; then
   curl -s --data "text=${message}" --data "chat_id=${TG_CHAT_ID}" --data "parse_mode=html" 'https://api.telegram.org/bot'${TG_TOKEN}'/sendMessage' > /dev/null

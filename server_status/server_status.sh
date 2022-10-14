@@ -35,7 +35,7 @@ fill_mount_line() {
 }
 
 # START
-if [[ -n "${DRIVES}" ]]; then
+if [[ -n "${SERVER_INFO}" ]]; then
   SERVER_INFO=${SERVER_INFO}$'\n\n'
 fi
 

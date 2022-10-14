@@ -12,6 +12,7 @@ Example:
 
 ```ini
 SERVER_NAME="HETZ-01"
+SERVER_INFO="OSMOSIS, COSMOS-RPC, HERMES"
 MOUNTS="/dev/nvme0n1p3 /dev/nvme1n1 /dev/nvme2n1"
 MOUNTS_NAMES="/root /mnt/disk1 /mnt/disk2"
 DRIVES="/dev/nvme0 /dev/nvme1 /dev/nvme2"
@@ -31,6 +32,8 @@ TG_TOKEN="23434343434:AAbbbcccabcabcacbabcabcabcabc"
 _File must end with a single blank line!_
 
 `SERVER_NAME` - any server name,
+
+`SERVER_INFO` - any server info, e.g. nodes list,
 
 `MOUNTS` - mount points separated by space (see instructions below),
 

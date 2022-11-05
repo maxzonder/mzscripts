@@ -23,7 +23,7 @@ set_status() {
   fi
   if [ "${result}" -lt $2 ]; then
     # set green (ok text) mark
-    status="OK" 
+    status="OK"
   fi
 }
 
@@ -39,20 +39,20 @@ if [[ -n "${SERVER_INFO}" ]]; then
   SERVER_INFO=${SERVER_INFO}$'\n\n'
 fi
 
-# Disk Storage 
+# Disk Storage
 IFS=" " read -a mountsArray <<< $MOUNTS
 IFS=" " read -a mountsNamesArray <<< $MOUNTS_NAMES
 df -h --total > $SCRIPT_DIR/server_status_df_query.txt
 
- output_line='MOUNT,SIZE,FREE,USED,STATUS'$'\n' 
-output_line+='-----,----,----,----,------'$'\n' 
+ output_line='MOUNT,SIZE,FREE,USED,STATUS'$'\n'
+output_line+='-----,----,----,----,------'$'\n'
 name_index=0;
 for mount in ${mountsArray[@]}; do
   output_line+="${mountsNamesArray[$i]},"
   fill_mount_line ${mount}
   ((i=i+1))
 done
-output_line+='-----,----,----,----,------'$'\n' 
+output_line+='-----,----,----,----,------'$'\n'
 output_line+="Total,"
 fill_mount_line "total"
 output_storage=$(echo "$output_line" | column -s "," -t)
@@ -64,31 +64,32 @@ if [[ -n "${DRIVES}" ]]; then
     smartctl -a ${drivesArray[$i]} > $SCRIPT_DIR/server_status_smart_query_drive${i}.txt
   done
   output_smart=""
-  for i in ${!drivesArray[@]}; do  
+  for i in ${!drivesArray[@]}; do
     output_smart+=$((i+1))". "
     output_smart+=$(awk -F '[[:space:]][[:space:]]+' '$1 == "Model Number:" {print $2}' $SCRIPT_DIR/server_status_smart_query_drive${i}.txt)$'\n'
     output_smart+="   ${drivesArray[$i]}"$'\n'
-    result=$(awk -F '[[:space:]][[:space:]]+' '$1 == "Percentage Used:" {print $2}' $SCRIPT_DIR/server_status_smart_query_drive${i}.txt | sed 's/.$//') 
+    result=$(awk -F '[[:space:]][[:space:]]+' '$1 == "Percentage Used:" {print $2}' $SCRIPT_DIR/server_status_smart_query_drive${i}.txt | sed 's/.$//')
     set_status $SMART_TRESHOLD_RED $SMART_TRESHOLD_YELLOW;
+    output_smart+="   Serial: "$(awk -F '[[:space:]][[:space:]]+' '$1 == "Serial Number:" {print $2}' $SCRIPT_DIR/server_status_smart_query_drive${i}.txt)$'\n'
     output_smart+="   Percentage Used: ${result}% - $status"$'\n'
-    errors=$(awk -F '[[:space:]][[:space:]]+' '$1 == "Error Information Log Entries:" {print $2}' $SCRIPT_DIR/server_status_smart_query_drive${i}.txt) 
+    errors=$(awk -F '[[:space:]][[:space:]]+' '$1 == "Error Information Log Entries:" {print $2}' $SCRIPT_DIR/server_status_smart_query_drive${i}.txt)
     status="OK"
     if [ "${errors}" -gt 0 ]; then
       # set red mark (cross mark emoji)
       status="\xE2\x9D\x8C"
     fi
-    output_smart+="   Error Entries:   ${errors} - $status"$'\n'    
-    data_written=$(grep "Data Units Written:" $SCRIPT_DIR/server_status_smart_query_drive${i}.txt) 
+    output_smart+="   Error Entries:   ${errors} - $status"$'\n'
+    data_written=$(grep "Data Units Written:" $SCRIPT_DIR/server_status_smart_query_drive${i}.txt)
     amount=$(echo "${data_written#*[}" | sed 's/.$//')
-    output_smart+="   Data Written: ${amount}"$'\n\n'
+    output_smart+="   Data Written:    ${amount}"$'\n\n'
   done
-else  
+else
   output_smart="Disabled"$'\n\n'
 fi
 
 # Memory usage
 total_memory=$(expr $(free -m | awk '/^Mem:/{print $2}') / 1024)
-avail_memory=$(awk -v low=$(grep low /proc/zoneinfo | awk '{k+=$2}END{print k}') '{a[$1]=$2}END{print a["MemFree:"]+a["Active(file):"]+a["Inactive(file):"]+a["SReclaimable:"]-(12*low);}' /proc/meminfo) 
+avail_memory=$(awk -v low=$(grep low /proc/zoneinfo | awk '{k+=$2}END{print k}') '{a[$1]=$2}END{print a["MemFree:"]+a["Active(file):"]+a["Inactive(file):"]+a["SReclaimable:"]-(12*low);}' /proc/meminfo)
 avail_memory=$(expr $avail_memory / 1048576)
 used_memory=$(($total_memory - $avail_memory))
 result=$(awk -v t1="$used_memory" -v t2="$total_memory" 'BEGIN { printf "%.0f", (t1/t2)*100 }')
@@ -99,7 +100,7 @@ output_memory="${used_memory} GB / ${total_memory} GB | Used: ${result}% - ${sta
 values=""
 for (( counts=1; counts<=10; counts++ )); do
   values+=$(top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1}')$'\n'
-  sleep 1 
+  sleep 1
 done
 cpu_usage=$(echo "$values" | awk -v counts=$counts '{ total += $1 } END { printf "%.2f", total/counts }')
 result=$(echo "${cpu_usage}" | awk '{print int($1+0.5)}')
@@ -107,7 +108,7 @@ set_status $CPU_TRESHOLD_RED $CPU_TRESHOLD_YELLOW;
 output_cpu="${cpu_usage}% - ${status}"
 
 # Send Message
-message=$(echo -e "<b>${SERVER_NAME}</b> | $(date +'%Y-%m-%d  %H:%M:%S')\n\n${SERVER_INFO}<b>Disk Space</b>\n\n<pre>${output_storage}</pre>\n\n<b>SMART Status</b>\n\n<pre>${output_smart}</pre><b>Memory</b>\n<pre>$output_memory</pre>\n\n<b>CPU</b>\n<pre>$output_cpu</pre>")
+message=$(echo -e "<b>${SERVER_NAME}</b> | $(date +'%Y-%m-%d  %H:%M:%S')\n\n${SERVER_INFO}<b>Disk Space</b>\n<pre>${output_storage}</pre>\n\n<b>SMART Status</b>\n<pre>${output_smart}</pre><b>Memory</b>\n<pre>$output_memory</pre>\n\n<b>CPU</b>\n<pre>$output_cpu</pre>")
 
 if [ -n "${TG_TOKEN}" ]; then
   curl -s --data "text=${message}" --data "chat_id=${TG_CHAT_ID}" --data "parse_mode=html" 'https://api.telegram.org/bot'${TG_TOKEN}'/sendMessage' > /dev/null

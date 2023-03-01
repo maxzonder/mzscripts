@@ -35,7 +35,7 @@ Add to cron after restake bot complete work (change `root` to your $HOME dir if 
 e.g. restake time is 18.30, run script at 18.40
 
 ```
-40 18 * * *  /bin/bash /root/scripts/restake_report.sh
+40 18 * * *  /bin/bash /root/scripts/restake_report/restake_report.sh
 ```
 
 ## Preview

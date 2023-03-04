@@ -6,7 +6,7 @@ Download script to restake bot server:
 mkdir -p $HOME/scripts/restake_report && cd $HOME/scripts/restake_report
 
 wget -O restake_report.sh https://raw.githubusercontent.com/maxzonder/mzscripts/main/restake_report/restake_report.sh
-wget -O restake_report.sh https://raw.githubusercontent.com/maxzonder/mzscripts/main/restake_report/restake_report.ini
+wget -O restake_report.ini https://raw.githubusercontent.com/maxzonder/mzscripts/main/restake_report/restake_report.ini
 ```
 
 ## `restake_report.ini` format
@@ -16,7 +16,6 @@ TG_CHAT_ID="123123123"
 TG_TOKEN="123123123:abcabcbacbacbacabacbacbacbacb"
 BALANCE_ALERT="10"
 ETH_CHAINS="Evmos Canto"
-
 ```
 
 `TG_CHAT_ID` - your telegram account id,
@@ -25,7 +24,7 @@ ETH_CHAINS="Evmos Canto"
 
 `BALANCE_ALERT` - alert if bot balance < 10 TOKENS,
 
-`ETH_CHAINS` - chains with denom 10^18
+`ETH_CHAINS` - list of chains with denom 10^18 (separated by space)
 
 _File must end with a single blank line._
 

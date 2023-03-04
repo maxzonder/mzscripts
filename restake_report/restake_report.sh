@@ -3,7 +3,7 @@
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 IFS="="
-while read -r name value
+while read -r name value || [[ $name && $value ]]; 
 do
   eval ${name}="${value}"
 done < $SCRIPT_DIR/restake_report.ini

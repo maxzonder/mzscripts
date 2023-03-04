@@ -5,7 +5,9 @@ SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 IFS="="
 while read -r name value || [[ $name && $value ]]; 
 do
-  eval ${name}="${value}"
+  if [[ -n "${name}" && "${name}" != [[:blank:]#]* ]]; then
+    eval ${name}="${value}"
+  fi
 done < $SCRIPT_DIR/restake_report.ini
 
 IFS=" " read -a ethChainsArray <<< $ETH_CHAINS

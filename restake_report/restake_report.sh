@@ -2,8 +2,13 @@
 
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-TG_CHAT_ID="3xxxxxxxxx"
-TG_TOKEN="2xxxxxxxx:AAxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+IFS="="
+while read -r name value
+do
+  eval ${name}="${value}"
+done < $SCRIPT_DIR/restake_report.ini
+
+IFS=" " read -a ethChainsArray <<< $ETH_CHAINS
 
 FILE_STATE=$SCRIPT_DIR/restake_state.txt
 FILE_MESSAGE=$SCRIPT_DIR/restake_message.txt
@@ -25,18 +30,25 @@ do
     echo $line | awk '{print "<b>"$1" "$2"</b>"}' >> $FILE_MESSAGE
     continue
   fi
+
+  if grep -q "Not an operator" <<< "$line" && (( ATTEMPT == 1 )); then
+    echo "-" >> $FILE_STATE
+    echo "${line}" >> $FILE_MESSAGE
+    continue
+  fi
   
   if grep -q "balance" <<< "$line" && (( ATTEMPT == 1 )); then
-    if [[ "$CHAIN" == "Evmos" ]]; then                                  # if needed add other EVM chains like "|| [[ "$CHAIN" == "Canto" ]]"
-      denom=1000000000000000000
-    else 
-      denom=1000000  
-    fi
+    denom=1000000  
+    for ethchain in ${ethChainsArray[@]}; do
+      if [[ "$CHAIN" == "$ethchain" ]]; then
+        denom=1000000000000000000
+      fi
+    done
     balance=$(awk -v denom="$denom" '{print $4/denom}' <<< $line)
     token=$(awk '{print toupper($5)}' <<< $line)
     token="${token:1}"
     alert=""
-    if (( ${balance%.*} < 10 )); then                                   # alert if balance < 10 tokens
+    if (( ${balance%.*} < BALANCE_ALERT )); then
       alert="\\xE2\\x9A\\xA0" 
     fi
     echo -e "Bot balance is $balance $token $alert" >> $FILE_MESSAGE
@@ -79,8 +91,8 @@ do
   fi
    
   if grep -q "TX 1: Failed" <<< "$line" && [ -z "${TX}" ]; then
-    echo "${line}" | awk -F ';' '{print "<pre>"substr($2,2),$3"</pre>"}' >> $FILE_MESSAGE
     TX=1
+    echo "${line}" | awk -F ';' '{print "<pre>"substr($2,2),$3"</pre>"}' >> $FILE_MESSAGE
     continue
   fi
 done 

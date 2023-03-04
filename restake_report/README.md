@@ -26,8 +26,6 @@ ETH_CHAINS="Evmos Canto"
 
 `ETH_CHAINS` - list of chains with denom 10^18 (separated by space)
 
-_File must end with a single blank line._
-
 
 Adjust `--since` value if needed here:
 ```

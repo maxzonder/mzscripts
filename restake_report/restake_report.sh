@@ -97,6 +97,12 @@ do
     echo "${line}" | awk -F ';' '{print "<pre>"substr($2,2),$3"</pre>"}' >> $FILE_MESSAGE
     continue
   fi
+  
+  if grep -q "Failed with error" <<< "$line" && [ -z "${TX}" ]; then
+    TX=1
+    echo "<pre>${line}</pre>" >> $FILE_MESSAGE
+    continue
+  fi
 done 
 
 MESSAGE=$(cat $FILE_MESSAGE)

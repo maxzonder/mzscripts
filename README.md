@@ -1,5 +1,5 @@
 # Scripts
-minima_check - check status and reassign minima nodes id
+minima_check - check status, current block, balance
 
 server_status - server disk usage, ram, cpu
 

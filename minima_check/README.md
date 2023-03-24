@@ -55,7 +55,7 @@ account_name5,server_name5,server_ip5,your_id5
 
 `port` (optional) - server IP port , if not specified, then = `9005`,
 
-`your_id` - your minima node id, e.g. `12345522-d4b4-32d6-8abc-e345a046528a1`.
+`your_id` - your minima node id, e.g. `12345522-d4b4-32d6-8abc-e345a046528a1`. - DEPRECATED
 
 _File must end with a single blank line._
 

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+SCRIPT_NAME=$(basename "$BASH_SOURCE")
 
 IFS="="
 while read -r name value || [[ $name && $value ]]; 
@@ -8,7 +9,7 @@ do
   if [[ -n "${name}" && "${name}" != [[:blank:]#]* ]]; then
     eval ${name}="${value}"
   fi
-done < $SCRIPT_DIR/restake_report.ini
+done < $SCRIPT_DIR/${SCRIPT_NAME%.*}.ini
 
 IFS=" " read -a ethChainsArray <<< $ETH_CHAINS
 
@@ -19,7 +20,7 @@ rm -f $FILE_STATE
 echo -e "\\xF0\\x9F\\x93\\xAB <b>RESTAKE</b> | $(date +'%a %d %b %Y %T %Z')\n" > $FILE_MESSAGE
 
 journalctl -u restake --since today -o cat --no-pager |
-while IFS="" read -r line || [ -n "$p" ]
+while IFS="" read -r line || [ -n "$line" ]
 do
   line=$(awk '{$1=""}1' <<< $line)
   line="${line:1}"
@@ -27,6 +28,7 @@ do
   if grep -q "Loaded" <<< "$line" && [ -z "${ATTEMPT}" ]; then
     ATTEMPT=1
     TX=""
+    DELEGATORS_CALCULATED=0
     CHAIN=$(awk '{print $2}' <<< $line)
     echo -n "${CHAIN}:," >> $FILE_STATE
     echo $line | awk '{print "<b>"$1" "$2"</b>"}' >> $FILE_MESSAGE
@@ -57,10 +59,11 @@ do
     continue
   fi
   
-  if grep -q "addresses" <<< "$line" && (( ATTEMPT == 1 )); then
+  if grep -q "addresses" <<< "$line" && (( DELEGATORS_CALCULATED == 0 )); then
     DELEGATORS=$(awk '{print $2}' <<< $line)
     echo "${DELEGATORS} delegators" >> $FILE_STATE
     echo "${line}" >> $FILE_MESSAGE
+    DELEGATORS_CALCULATED=1
     continue
   fi
 

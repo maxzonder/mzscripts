@@ -72,7 +72,7 @@ if [[ -n "${DRIVES}" ]]; then
     set_status $SMART_TRESHOLD_RED $SMART_TRESHOLD_YELLOW;
     output_smart+="   Serial: "$(awk -F '[[:space:]][[:space:]]+' '$1 == "Serial Number:" {print $2}' $SCRIPT_DIR/server_status_smart_query_drive${i}.txt)$'\n'
     output_smart+="   Percentage Used: ${result}% - $status"$'\n'
-    errors=$(awk -F '[[:space:]][[:space:]]+' '$1 == "Error Information Log Entries:" {print $2}' $SCRIPT_DIR/server_status_smart_query_drive${i}.txt)
+    errors=$(awk -F '[[:space:]][[:space:]]+' '$1 == "Media and Data Integrity Errors:" {print $2}' $SCRIPT_DIR/server_status_smart_query_drive${i}.txt)
     status="OK"
     if [ "${errors}" -gt 0 ]; then
       # set red mark (cross mark emoji)

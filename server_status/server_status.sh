@@ -15,8 +15,8 @@ done < $SCRIPT_DIR/server_status.ini
 # FUNCTIONS
 
 set_status() {
-  # set yellow mark (warning sign emoji)
-  status="\xE2\x9A\xA0"
+  # set yellow mark (yellow circle emoji)
+  status="\xF0\x9F\x9F\xA1"
   if [ "${result}" -gt $1 ]; then
     # set red mark (large red circle emoji)
     status="\xF0\x9F\x94\xB4"

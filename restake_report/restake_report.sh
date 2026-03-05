@@ -1,10 +1,11 @@
 #!/bin/bash
 
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-SCRIPT_NAME=$(basename "$BASH_SOURCE")
+SCRIPT_NAME=$(basename "$BASH_SOURCE") 
+[ -f "$SCRIPT_DIR/${SCRIPT_NAME%.*}.ini" ] || { echo "ERROR: ${SCRIPT_NAME%.*}.ini not found"; exit 1; }
 
 IFS="="
-while read -r name value || [[ $name && $value ]]; 
+while read -r name value || [[ $name && $value ]] 
 do
   if [[ -n "${name}" && "${name}" != [[:blank:]#]* ]]; then
     eval ${name}="${value}"
@@ -19,91 +20,94 @@ FILE_MESSAGE=$SCRIPT_DIR/restake_message.txt
 rm -f $FILE_STATE
 echo -e "\\xF0\\x9F\\x93\\xAB <b>RESTAKE</b> | $(date +'%a %d %b %Y %T %Z')\n" > $FILE_MESSAGE
 
-journalctl -u restake --since today -o cat --no-pager |
+ATTEMP=0
+
+journalctl -u restake --since "today" -o cat --no-pager |
 while IFS="" read -r line || [ -n "$line" ]
 do
+
+  line=$(awk '{$1=""}1' <<< $line)
   line=$(awk '{$1=""}1' <<< $line)
   line="${line:1}"
 
-  if grep -q "Loaded" <<< "$line" && [ -z "${ATTEMPT}" ]; then
-    ATTEMPT=1
-    TX=""
-    DELEGATORS_CALCULATED=0
-    CHAIN=$(awk '{print $2}' <<< $line)
-    echo -n "${CHAIN}:," >> $FILE_STATE
-    echo $line | awk '{print "<b>"$1" "$2"</b>"}' >> $FILE_MESSAGE
-    continue
-  fi
-
-  if grep -q "Not an operator" <<< "$line" && (( ATTEMPT == 1 )); then
-    echo "-" >> $FILE_STATE
-    echo "${line}" >> $FILE_MESSAGE
+  if grep -q "Loaded chain" <<< "$line" && (( ATTEMP == 0 )); then
+    ATTEMP=1 # new chain parsing started
+    delegators=""
+    chain=$(echo "$line" | grep -oP 'prettyName=\K\w+')
+    echo -n "${chain}:," >> $FILE_STATE
+    echo "<b>Loaded ${chain}</b>"  >> $FILE_MESSAGE
     continue
   fi
   
-  if grep -q "balance" <<< "$line" && (( ATTEMPT == 1 )); then
-    denom=1000000  
+  if grep -q "Found addresses" <<< "$line" && (( ATTEMP == 1 )); then
+    delegators="$(echo "$line" | grep -oP 'count=\K\w+') delegators"
+    echo "Found ${delegators} addresses with valid grants" >> $FILE_MESSAGE
+    continue
+  fi
+
+  if grep -q "Fetched bot balance" <<< "$line" && (( ATTEMP == 1 )); then
+    exponent=6  
     for ethchain in ${ethChainsArray[@]}; do
-      if [[ "$CHAIN" == "$ethchain" ]]; then
-        denom=1000000000000000000
+      if [[ "$chain" == "$ethchain" ]]; then
+        exponent=18
+        break
       fi
     done
-    balance=$(awk -v denom="$denom" '{print $4/denom}' <<< $line)
-    token=$(awk '{print toupper($5)}' <<< $line)
-    token="${token:1}"
-    alert=""
-    if (( ${balance%.*} < BALANCE_ALERT )); then
-      alert="\\xE2\\x9A\\xA0" 
-    fi
-    echo -e "Bot balance is $balance $token $alert" >> $FILE_MESSAGE
-    continue
-  fi
-  
-  if grep -q "addresses" <<< "$line" && (( DELEGATORS_CALCULATED == 0 )); then
-    DELEGATORS=$(awk '{print $2}' <<< $line)
-    echo "${DELEGATORS} delegators" >> $FILE_STATE
-    echo "${line}" >> $FILE_MESSAGE
-    DELEGATORS_CALCULATED=1
+    balance=$(echo "$line" | grep -oP 'amount=\K\w+')
+    denom=$(echo "$line" | grep -oP 'denom=\K\w+')
+    symbol="${denom:1}"
+    symbol="${symbol^^}"
+    denomed_amount=$(echo "scale=2; x=${balance}/(10^${exponent}); if(x==0) print \"0.0\" else if(x>0 && x<1) print 0,x else if(x>-1 && x<0) print \"-0\",-x else print x" | bc)
+    denomed_amount=$(echo "$denomed_amount" | sed 's/\.0*$//;s/\([0-9]*\.[0-9]*[1-9]\)0*$/\1/')
+    (( $(echo "$denomed_amount < $BALANCE_ALERT" | bc) )) && alert=" \\xF0\\x9F\\x9F\\xA1" || alert=""
+    echo -e "Bot balance is $denomed_amount ${symbol}${alert}" >> $FILE_MESSAGE
     continue
   fi
 
+  if grep -q "Autostake finished for" <<< "$line"; then
+    ATTEMP=0 # finished parsing chain
+    echo "${delegators}" >> $FILE_STATE
+    echo "Autostake finished" >> $FILE_MESSAGE
+    continue
+  fi
+
+  if grep -q "Autostake failed for" <<< "$line" ; then  
+    ATTEMP=0 # finished parsing chain
+    [[ -z "$delegators" ]] && delegators="N/A"
+    echo "${delegators}" >> $FILE_STATE  
+    echo -e "\\xF0\\x9F\\x94\\xB4 Autostake failed" >> $FILE_MESSAGE
+    continue
+  fi
+
+  if grep -q "Not an operator" <<< "$line"; then
+    delegators="NaO"
+    echo -e "\\xF0\\x9F\\x9F\\xA1 Not an operator" >> $FILE_MESSAGE
+    continue
+  fi
+
+  # inside attemps
+
   if grep -q "Failed attempt" <<< "$line" ; then
-    ATTEMPT=2
+    ((ATTEMP++)) # skip "Fetched bot balance" and "Found addresses" parsing inside attemps iterations
     echo "${line}" >> $FILE_MESSAGE
     continue
   fi
-  
-  if grep -q "Autostake completed" <<< "$line" ; then
-    echo "${line}" >> $FILE_MESSAGE
+
+  if grep -q "TX 1: Failed" <<< "$line" && (( ATTEMP == 2 )); then
+    ((ATTEMP++)) # skip next "TX 1: Failed" parsing
+    error_code=$(echo "${line##*Code:}")
+    echo "<pre>TX 1: Failed; code:${error_code}</pre>" >> $FILE_MESSAGE
     continue
   fi
-  
-  if grep -q "Autostake finished" <<< "$line" ; then
-    ATTEMPT=""
-    echo -e "${line}" >> $FILE_MESSAGE
+
+  if grep -q "Failed with error" <<< "$line" && (( ATTEMP == 2 )); then
+    ((ATTEMP++)) # skip next "Failed with error" parsing
+    echo "<pre>${line}</pre>" >> $FILE_MESSAGE
     continue
   fi
 
   if grep -q "Autostake failed after" <<< "$line" ; then
     echo "${line}" >> $FILE_MESSAGE
-    continue
-  fi
-  
-  if grep -q "Autostake failed" <<< "$line" ; then  
-    ATTEMPT=""
-    echo -e "\\xF0\\x9F\\x94\\xB4 ${line}" >> $FILE_MESSAGE              # red circle alert if autostake failed
-    continue
-  fi
-   
-  if grep -q "TX 1: Failed" <<< "$line" && [ -z "${TX}" ]; then
-    TX=1
-    echo "${line}" | awk -F ';' '{print "<pre>"substr($2,2),$3"</pre>"}' >> $FILE_MESSAGE
-    continue
-  fi
-  
-  if grep -q "Failed with error" <<< "$line" && [ -z "${TX}" ]; then
-    TX=1
-    echo "<pre>${line}</pre>" >> $FILE_MESSAGE
     continue
   fi
 done 
